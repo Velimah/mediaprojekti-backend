@@ -11,6 +11,10 @@ app.use(cors());
 app.use(express.urlencoded({extended: true}));
 app.use('/gpt', routes);
 
+app.get('/', (req, res) => {
+  res.send('Hello World');
+});
+
 const mongoString = process.env.DATABASE_URL
 mongoose.connect(mongoString);
 const database = mongoose.connection;
