@@ -2,9 +2,10 @@
 require('dotenv').config();
 const express = require('express');
 const router = express.Router();
-module.exports = router;const { gptResult, gptQuery } = require('../models/gpt-model'); 
-import { getRole } from '../roles';
-import { Request, Response } from 'express';
+module.exports = router;
+const { gptResult, gptQuery } = require('../models/gpt-model'); 
+import { getRole, Role } from '../roles';
+import { Response } from 'express';
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
@@ -28,17 +29,17 @@ type Message = {
 const messages: Message[] = [];
 
 // route for sending queries to OpenAI GPT-3.5 API
-router.post('/completions', async (req: Request, res: Response) => {
+router.post('/completions', async (req: { body: { role: Role; prompt: string; }; }, res: Response) => {
 
   // save system role to messages array
-  const systemMessage = {
+  const systemMessage: Message = {
     role: "system",
     content: getRole(req.body.role),
   };
   messages.push(systemMessage);
 
   // save user prompt to messages array
-  const userMessage = {
+  const userMessage: Message = {
     role: "user",
     content: req.body.prompt,
   };
@@ -72,12 +73,12 @@ const promptGPT = async (messages: Message[]) => {
     console.log("fetching gpt");
     const response = await fetch("https://api.openai.com/v1/chat/completions", options);
     const data : ApiResponse = await response.json() as ApiResponse;
-
+    
     // save response to database
     await saveToDatabase(data);
 
     // save chatGPT response to messages array
-    const assistantMessage = {
+    const assistantMessage: Message = {
       role: data.choices[0].message.role,
       content: data.choices[0].message.content,
     };
@@ -104,8 +105,9 @@ const saveQueriesToDatabase = async (messages: Array<{ role: string, content: st
   await databaseData.save();
 }
 
+type Size = "256x256" | "512x512" | "1024x1024";
 // route for sending queries to OpenAI DALLE image API
-router.post('/generations', async (req: Request, res: Response) => {
+router.post('/generations', async (req: { body: { prompt: string; size: Size; }; }, res: Response) => {
   try {
     const responseContent = await generateImage(req.body.prompt, req.body.size);
     res.send(responseContent);
@@ -116,7 +118,7 @@ router.post('/generations', async (req: Request, res: Response) => {
 });
 
 // function for fetching response from OpenAI DALLE image API
-const generateImage = async (prompt: string, size: string) => {
+const generateImage = async (prompt: string, size: Size) => {
   const options = {
       method: "POST",
       headers: {
