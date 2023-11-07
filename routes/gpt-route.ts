@@ -6,11 +6,12 @@ module.exports = router;
 const { gptResult, gptQuery } = require('../models/gpt-model'); 
 import { getRole, Role } from '../roles';
 import { Response } from 'express';
+import fs from 'fs';
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 // interface for response from OpenAI GPT-3.5 API
-interface ApiResponse {
+interface GptResponse {
   choices: [{
     message: {
       role: string;
@@ -65,14 +66,14 @@ const promptGPT = async (messages: Message[]) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-3.5-turbo",
+        model: "gpt-3.5-turbo-1106",
         messages: messages,
       }),
     };
 
     console.log("fetching gpt");
     const response = await fetch("https://api.openai.com/v1/chat/completions", options);
-    const data : ApiResponse = await response.json() as ApiResponse;
+    const data : GptResponse = await response.json() as GptResponse;
     
     // save response to database
     await saveToDatabase(data);
@@ -86,15 +87,22 @@ const promptGPT = async (messages: Message[]) => {
 
     // save messagehistory array to database
     await saveQueriesToDatabase(messages);
-    return data.choices[0].message.content;
+    const htmlData = data.choices[0].message.content;
+
+    //create html file for query result into test.html
+    const filePath = 'test.html';
+    fs.writeFileSync(filePath, htmlData);
+    console.log("HTML file created successfully at: " + filePath);
+
+    //return html data to frontend
+    return htmlData;
   } catch (error) {
     console.error(error);
   }
-
 }
 
 // function for saving response from OpenAI GPT-3.5 API to database
-const saveToDatabase = async (data: ApiResponse) => {
+const saveToDatabase = async (data: GptResponse) => {
   const databaseData = new gptResult({ data });
   await databaseData.save();
 }
@@ -105,8 +113,8 @@ const saveQueriesToDatabase = async (messages: Array<{ role: string, content: st
   await databaseData.save();
 }
 
-type Size = "256x256" | "512x512" | "1024x1024";
 // route for sending queries to OpenAI DALLE image API
+type Size = "256x256" | "512x512" | "1024x1024";
 router.post('/generations', async (req: { body: { prompt: string; size: Size; }; }, res: Response) => {
   try {
     const responseContent = await generateImage(req.body.prompt, req.body.size);

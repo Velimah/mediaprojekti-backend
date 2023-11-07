@@ -1,21 +1,21 @@
 "use strict";
 const mongoose = require('mongoose');
 
-const dataSchema = new mongoose.Schema({
+const GptResponseSchema = new mongoose.Schema({
   data: Object,
 }, { timestamps: true, versionKey: false, collection: 'GPT' });
 
-const subSchema = new mongoose.Schema({
+const GptMessagessubSchema = new mongoose.Schema({
   role: String,
   content: String
 });
 
-const dataSchema2 = new mongoose.Schema({
-  Queries: [subSchema]
+const GptMessagesSchema = new mongoose.Schema({
+  Queries: [GptMessagessubSchema]
 }, { timestamps: true, versionKey: false, collection: 'GPT-Queries' });
 
-const gptResult = mongoose.model('gptResult', dataSchema); 
-const gptQuery = mongoose.model('gptQuery', dataSchema2); 
+const gptResult = mongoose.model('gptResult', GptResponseSchema); 
+const gptQuery = mongoose.model('gptQuery', GptMessagesSchema); 
 
 module.exports = { 
   gptResult, gptQuery
