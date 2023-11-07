@@ -20,6 +20,12 @@ interface GptResponse {
   }];
 }
 
+interface DalleResponse {
+  data: [{
+    url: string; 
+  }];
+}
+
 // type for messages array
 type Message = {
   role: string;
@@ -58,7 +64,6 @@ router.post('/completions', async (req: { body: { role: Role; prompt: string; };
 
 // function for fetching response from OpenAI GPT-3.5 API
 const promptGPT = async (messages: Message[]) => {
-  try {
     const options = {
       method: "POST",
       headers: {
@@ -71,6 +76,7 @@ const promptGPT = async (messages: Message[]) => {
       }),
     };
 
+  try {
     console.log("fetching gpt");
     const response = await fetch("https://api.openai.com/v1/chat/completions", options);
     const data : GptResponse = await response.json() as GptResponse;
@@ -87,6 +93,7 @@ const promptGPT = async (messages: Message[]) => {
 
     // save messagehistory array to database
     await saveQueriesToDatabase(messages);
+
     const htmlData = data.choices[0].message.content;
 
     //create html file for query result into test.html
@@ -144,8 +151,9 @@ const generateImage = async (prompt: string, size: Size) => {
   try {
     console.log("fetching image");
     const response = await fetch("https://api.openai.com/v1/images/generations", options);
-    const data = await response.json();
+    const data: DalleResponse = await response.json() as DalleResponse;
     console.log("success", data);
+    // TODO: return to frontend; 
   } catch (error) {
     console.error(error);
   }
