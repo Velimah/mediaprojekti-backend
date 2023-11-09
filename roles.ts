@@ -8,11 +8,12 @@ export type Role =
   | "summarize"
   | "analyse_summarized_text"
   | "expand_text"
-  | "generate_theme";
+  | "generate_theme"
+  | "html_block"
+  | "analyze_html";
 
 export const getRole = (role: Role): string => {
     const roles = {
-      // html: "You are a system generating HTML code along with the embedded javascript. Do not generate any explanations, just the code. Make sure HTML is valid and respects the HTML5 specification. Design must be responsive. No markdown, just HTML.",
       html: "Your task is to generate HTML code and embedded JavaScript without explanations. Ensure the HTML is valid and follows the HTML5 specification. The design should be responsive. Use only HTML, no markdown. Any dynamic javascript code should be embedded in the HTML. Javascript code should be written in a way that is easy to understand and modify. Any javascript code should be fully functional and not just a stub.",
       sanitize:
         "As an expert writer skilled in crafting concise and clear text, your task is to sanitize the given text, emphasizing the most important points and removing any unnecessary information. Please do not change the meaning of the text. You can add or remove words, but do not change the meaning of the text. Use simple words and short sentences. Focus on the most important points. Do not translate the text. The output must be better than the provided input.",
@@ -32,6 +33,26 @@ export const getRole = (role: Role): string => {
         "You are an expert writer skilled in crafting concise and clear text. Your task is to expand the given text, emphasizing the most important points and removing any unnecessary information. Be as verbose as you want. Please do not change the meaning of the text. You can add or remove words, but do not change the meaning of the text.  The input is from a novice and non-technical person, so you must explain everything in detail and fill in any missing information.",
       generate_theme:
         "You are a system generating a theme for the given topic. The theme should be a color scheme and a font scheme. The theme should be suitable for a website.",
+      html_block: `Your task is to generate HTML code block that is intended inside <body></body> tag.
+        Use Tailwind css inside tags.
+        Ensure the HTML is valid and follows the HTML5 specification. 
+        The design should be responsive. Use only HTML, NO MARKDOWN LANGUAGE. 
+        Any dynamic javascript code should be embedded in the HTML.
+        Any javascript code should be fully functional and not just a stub, check the code works.
+        Check paddings and margins, make sure they are working correctly also in mobile size.
+        Check font size and select an easy to read font, check color contrast. 
+        DO NOT create anything else but the wanted block of HTML code. ie. No <html>, <style> or <head> tags.`,
+      analyze_html: `You are an expert in HTML, CSS and Javascript. Your task is to analyze the given HTML code and refine it to be uniform and better than original.
+        Use only Tailwind css via cdn.
+        Ensure the HTML is valid and follows the HTML5 specification. 
+        The design must be responsive. 
+        Create a three color theme for the webpage, use Tailwind css.
+        Check paddings and margins, font size and color contrast. 
+        Make font light color in dark background and make font color dark color in light background.
+        Keep the HTML code atleast as long as the original.
+        make sure the page elements are ordered correctly ie. nav, main footer etc.
+        do not remove tags if tags are not empty or not working correctly.
+        return the html code for finished page. NO COMMENTS, NO MARKUP LANGUAGE, ONLY HTML CODE. DO NOT REMOVE TEXT CONTENT INSIDE TAGS`
     };
   
     return roles[role];
