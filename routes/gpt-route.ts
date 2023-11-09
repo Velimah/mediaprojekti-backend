@@ -3,10 +3,9 @@ require('dotenv').config();
 const express = require('express');
 const router = express.Router();
 module.exports = router;
-const { gptResult, gptQuery } = require('../models/gpt-model'); 
+const { gptResult } = require('../models/gpt-model'); 
 import { getRole, Role } from '../roles';
 import { Response } from 'express';
-import fs from 'fs';
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
@@ -26,35 +25,12 @@ interface DalleResponse {
   }];
 }
 
-// type for messages array
-type Message = {
-  role: string;
-  content: string;
-};
-
-// array of objects for messagehistory with openAI
-const messages: Message[] = [];
-
 // route for sending queries to OpenAI GPT-3.5 API
 router.post('/completions', async (req: { body: { role: Role; prompt: string; }; }, res: Response) => {
 
-  // save system role to messages array
-  const systemMessage: Message = {
-    role: "system",
-    content: getRole(req.body.role),
-  };
-  messages.push(systemMessage);
-
-  // save user prompt to messages array
-  const userMessage: Message = {
-    role: "user",
-    content: req.body.prompt,
-  };
-  messages.push(userMessage);
-
   // start promptGPT function to fetch response from OpenAI GPt-3.5 API
   try {
-    const responseContent = await promptGPT(messages);
+    const responseContent = await promptGPT(req.body.role, req.body.prompt);
     res.send(responseContent);
   } catch (error) {
     console.error(error);
@@ -63,7 +39,7 @@ router.post('/completions', async (req: { body: { role: Role; prompt: string; };
 });
 
 // function for fetching response from OpenAI GPT-3.5 API
-const promptGPT = async (messages: Message[]) => {
+const promptGPT = async (role: Role, prompt: string) => {
     const options = {
       method: "POST",
       headers: {
@@ -71,8 +47,17 @@ const promptGPT = async (messages: Message[]) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-3.5-turbo-1106",
-        messages: messages,
+        model: "gpt-3.5-turbo-1106", //gpt-3.5-turbo-16k
+        messages: [
+          {
+            role: "system",
+            content: getRole(role),
+          },
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
       }),
     };
 
@@ -80,30 +65,16 @@ const promptGPT = async (messages: Message[]) => {
     console.log("fetching gpt");
     const response = await fetch("https://api.openai.com/v1/chat/completions", options);
     const data : GptResponse = await response.json() as GptResponse;
-    
+    console.log("success", data);
     // save response to database
     await saveToDatabase(data);
 
-    // save chatGPT response to messages array
-    const assistantMessage: Message = {
-      role: data.choices[0].message.role,
-      content: data.choices[0].message.content,
-    };
-    messages.push(assistantMessage);
-
-    // save messagehistory array to database
-    await saveQueriesToDatabase(messages);
-
-    const htmlData = data.choices[0].message.content;
-
-    //create html file for query result into test.html
-    const filePath = 'test.html';
-    fs.writeFileSync(filePath, htmlData);
-    console.log("HTML file created successfully at: " + filePath);
+    const htmlData: string = data.choices[0].message.content;
 
     //return html data to frontend
     return htmlData;
   } catch (error) {
+    console.log("error", error);
     console.error(error);
   }
 }
@@ -111,12 +82,6 @@ const promptGPT = async (messages: Message[]) => {
 // function for saving response from OpenAI GPT-3.5 API to database
 const saveToDatabase = async (data: GptResponse) => {
   const databaseData = new gptResult({ data });
-  await databaseData.save();
-}
-
-// function for saving messagehistory array to database
-const saveQueriesToDatabase = async (messages: Array<{ role: string, content: string }>) => {
-  const databaseData = new gptQuery({ Queries: messages });
   await databaseData.save();
 }
 
@@ -158,3 +123,5 @@ const generateImage = async (prompt: string, size: Size) => {
     console.error(error);
   }
 }
+
+export default promptGPT;
