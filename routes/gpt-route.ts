@@ -1,11 +1,10 @@
 'use strict';
-require('dotenv').config();
-const express = require('express');
-const router = express.Router();
-module.exports = router;
-const { gptResult } = require('../models/gpt-model'); 
+import express, { Response } from 'express';
+import dotenv from 'dotenv';
 import { getRole, Role } from '../roles';
-import { Response } from 'express';
+import { gptResult } from '../models/gpt-model';
+dotenv.config();
+const router = express.Router();
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
@@ -124,4 +123,4 @@ const generateImage = async (prompt: string, size: Size) => {
   }
 }
 
-export default promptGPT;
+export { router };
