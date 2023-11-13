@@ -1,22 +1,20 @@
 {
-    "compilerOptions": {
-      "target": "ESNext",
-      "module": "NodeNext",
-      "moduleResolution": "NodeNext",
-      "strict":true,
-      "esModuleInterop": true,
-      "skipLibCheck": true,
-      "forceConsistentCasingInFileNames": true,
-      "types": ["node"],
-      "outDir": "./nodejs",
-      "lib": ["ESNext"],
-      "allowImportingTsExtensions": true,
-      "resolveJsonModule": true,
-      "isolatedModules": true,
-      "noEmit": true,
-      "noImplicitAny": true,
-      "noUnusedLocals": true,
-      "noUnusedParameters": true,
-    },
-    "include": ["./*"]
-}  
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "types": ["node"],
+    "outDir": "./dist",
+    "lib": ["ESNext"],
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noImplicitAny": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
+  },
+  "include": ["./**/*.ts"]
+}

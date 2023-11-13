@@ -1,5 +1,5 @@
 "use strict";
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const GptResponseSchema = new mongoose.Schema({
   data: Object,
@@ -17,6 +17,5 @@ const GptMessagesSchema = new mongoose.Schema({
 const gptResult = mongoose.model('gptResult', GptResponseSchema); 
 const gptQuery = mongoose.model('gptQuery', GptMessagesSchema); 
 
-module.exports = { 
-  gptResult, gptQuery
-}
+
+export { gptResult, gptQuery };
