@@ -10,7 +10,8 @@ export type Role =
   | "expand_text"
   | "generate_theme"
   | "html_block"
-  | "analyze_html";
+  | "analyze_html"
+  | "create_head";
 
 export const getRole = (role: Role): string => {
     const roles = {
@@ -34,25 +35,26 @@ export const getRole = (role: Role): string => {
       generate_theme:
         "You are a system generating a theme for the given topic. The theme should be a color scheme and a font scheme. The theme should be suitable for a website.",
       html_block: `Your task is to generate HTML code block that is intended inside <body></body> tag.
-        Use Tailwind css inside tags.
-        Ensure the HTML is valid and follows the HTML5 specification. 
-        The design should be responsive. Use only HTML, NO MARKDOWN LANGUAGE. 
-        Any dynamic javascript code should be embedded in the HTML.
-        Any javascript code should be fully functional and not just a stub, check the code works.
-        Check paddings and margins, make sure they are working correctly also in mobile size.
-        Check font size and select an easy to read font, check color contrast. 
-        DO NOT create anything else but the wanted block of HTML code. ie. No <html>, <style> or <head> tags.`,
+ Ensure the HTML is valid and follows the HTML5 specification. 
+ The design should be responsive. Use only HTML, NO MARKDOWN LANGUAGE. 
+ Any dynamic javascript code should be embedded in the HTML.
+ Any javascript code should be fully functional and not just a stub, check the code works.
+ Check paddings and margins, make sure they are working correctly also in mobile size.
+ Check font size and select an easy to read font, check color contrast. 
+ DO NOT create anything else but the wanted block of HTML code. ie. No <html>, <style> or <head> tags.`,
       analyze_html: `You are an expert in HTML, CSS and Javascript. Your task is to analyze the given HTML code and refine it to be uniform and better than original.
-        Use only Tailwind css via cdn.
-        Ensure the HTML is valid and follows the HTML5 specification. 
-        The design must be responsive. 
-        Create a three color theme for the webpage, use Tailwind css.
-        Check paddings and margins, font size and color contrast. 
-        Make font light color in dark background and make font color dark color in light background.
-        Keep the HTML code atleast as long as the original.
-        make sure the page elements are ordered correctly ie. nav, main footer etc.
-        do not remove tags if tags are not empty or not working correctly.
-        return the html code for finished page. NO COMMENTS, NO MARKUP LANGUAGE, ONLY HTML CODE. DO NOT REMOVE TEXT CONTENT INSIDE TAGS`
+ Use only Tailwind css via cdn.
+ Ensure the HTML is valid and follows the HTML5 specification. 
+ The design must be responsive. 
+ Create a three color theme for the webpage, use Tailwind css.
+ Check paddings and margins, font size and color contrast. 
+ Make font light color in dark background and make font color dark color in light background.
+ Keep the HTML code atleast as long as the original.
+ make sure the page elements are ordered correctly ie. nav, main footer etc.
+ do not remove tags if tags are not empty or not working correctly.
+ return the html code for finished page. NO COMMENTS, NO MARKUP LANGUAGE, ONLY HTML CODE. DO NOT REMOVE TEXT CONTENT INSIDE TAGS`,
+      create_head: `You are an expert in Search engine optimization and making <head></head> tags. 
+ Your task is to analyze the given HTML code and add search engine optimization meta tags and other wanted tags inside <head></head> tag.`
     };
   
     return roles[role];
