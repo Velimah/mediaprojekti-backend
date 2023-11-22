@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import { router as gptroutes } from './routes/gpt-route';
+import { router as userroutes } from './routes/user-routes';
 import dotenv from 'dotenv';
 dotenv.config();
 const PORT = process.env.PORT || 8000;
@@ -11,6 +12,7 @@ app.use(express.json());
 app.use(cors());
 app.use(express.urlencoded({extended: true}));
 app.use('/gpt', gptroutes);
+app.use('/user', userroutes);
 
 app.get('/', (_req: Request, res: Response) => {
   res.send('Hello World!');
