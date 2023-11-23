@@ -65,6 +65,10 @@ router.post("/login", async (req: Request, res: Response) => {
 
     // JWT token
     const token = generateToken({ username: user.username });
+    console.log(token);
+
+    // Set token in auth
+    res.setHeader("Authorization", `Bearer ${token}`);
 
     return res.status(200).json({ message: "Login successful", token });
   } catch (error: unknown) {
@@ -76,6 +80,24 @@ router.post("/login", async (req: Request, res: Response) => {
       return res
         .status(500)
         .json({ message: "Login failed", error: String(error) });
+    }
+  }
+});
+
+// Logout user
+router.post("/logout", async (_req: Request, res: Response) => {
+  try {
+    // do something here?
+    return res.status(200).json({ message: "Logged out" });
+  } catch (error: unknown) {
+    if (error instanceof MongoError) {
+      return res
+        .status(500)
+        .json({ message: "MongoError: ", error: error.message });
+    } else {
+      return res
+        .status(500)
+        .json({ message: "Logout failed: ", error: String(error) });
     }
   }
 });
