@@ -9,7 +9,17 @@ const PORT = process.env.PORT || 8000;
 const app = express();
 
 app.use(express.json());
-app.use(cors());
+
+const allowlist: string[] = [
+  'http://localhost:5173',
+  'http://localhost:8000',
+  'https://medpal-catkos.northeurope.cloudapp.azure.com',
+];
+const corsOptions = {
+  origin: allowlist,
+};
+
+app.use(cors(corsOptions));
 app.use(express.urlencoded({extended: true}));
 app.use('/gpt', gptroutes);
 app.use('/user', userroutes);
