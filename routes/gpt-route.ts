@@ -117,7 +117,9 @@ const generateImage = async (prompt: string, size: Size) => {
     const response = await fetch("https://api.openai.com/v1/images/generations", options);
     const data: DalleResponse = await response.json() as DalleResponse;
     console.log("success", data);
-    // TODO: return to frontend; 
+    // Return url
+    // TODO: return shortened URL
+    return(data.data[0].url);
   } catch (error) {
     console.error(error);
   }
