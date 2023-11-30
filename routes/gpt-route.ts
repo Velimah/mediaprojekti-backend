@@ -3,6 +3,9 @@ import express, { Response } from 'express';
 import dotenv from 'dotenv';
 import { getRole, Role } from '../roles';
 import { gptResult } from '../models/gpt-model';
+import * as https from 'https';
+import * as fs from 'fs';
+import * as path from 'path';
 dotenv.config();
 const router = express.Router();
 
@@ -107,22 +110,91 @@ const generateImage = async (prompt: string, size: Size) => {
       body: JSON.stringify({
         prompt: prompt,
         n: 1,
-        size: size
+        size: size,
       })
     };
 
   // fetch image from OpenAI DALLE image API
   try {
-    console.log("fetching image");
+    console.log("fetching image for '"+prompt+"'");
     const response = await fetch("https://api.openai.com/v1/images/generations", options);
     const data: DalleResponse = await response.json() as DalleResponse;
     console.log("success", data);
     // Return url
     // TODO: return shortened URL
-    return(data.data[0].url);
+    return(await downloadImage(data.data[0].url));
   } catch (error) {
     console.error(error);
   }
 }
+
+// Function to download an image from a URL and save it to a local folder
+const downloadImage = async (url: string) => {
+  const baseURL = 'http://localhost:8000/';
+  let imageURL = baseURL;
+  // Go up two levels
+  const rootFolder = path.join(__dirname, '..', '..', 'public');
+  const dateFolder = '\\'+getLocalDate(); // todays date, in day.month.year format
+  const folderPath = rootFolder+dateFolder;
+  
+  // Ensure the folder exists, if not, create a new folder
+  if (!fs.existsSync(folderPath)) {
+    fs.mkdirSync(folderPath, { recursive: true });
+  }
+
+  // If filename already exists, add a number to it
+  const fileType = ".png";
+  // TODO: add username to fileName?
+  const fileName = "ai";
+  let counter = 1;
+  while(fs.existsSync(folderPath + '\\' + fileName + '_' + counter + fileType)){counter++;}
+
+  const newFileName = fileName + '_' + counter + fileType;
+
+  const imagePath = path.join(folderPath, newFileName);
+
+  // Send an HTTP GET request to the URL
+  const request = https.get(url, (response) => {
+    // Create a writable stream to the local file
+    const fileStream = fs.createWriteStream(imagePath);
+
+    // Pipe the response stream to the local file
+    response.pipe(fileStream);
+
+    // Listen for the 'end' event to know when the download is complete
+    fileStream.on('finish', () => {
+      fileStream.close(() => {
+        console.log(`Image downloaded and saved to: ${imagePath}`);
+        imageURL = imageURL + 'public/'+getLocalDate()+'/'+newFileName;
+        console.log('Image URL: '+imageURL);
+      });
+    });
+  });
+
+  // Handle errors during the HTTPS request
+  request.on('error', (err) => {
+    console.error('Error downloading the image:', err);
+  });
+
+  //return url
+  return imageURL;
+}
+
+const getLocalDate = () => {
+  const date = new Date();
+
+  const options: Intl.DateTimeFormatOptions ={
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  };
+
+  const formattedDate = date.toLocaleDateString('fi-FI', options)
+    .replace(/\./g, '_'); // Replace dots with underscores
+
+  console.log(formattedDate);
+  return formattedDate;
+}
+
 
 export { router };

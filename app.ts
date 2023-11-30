@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import { router as gptroutes } from './routes/gpt-route';
 import dotenv from 'dotenv';
+import path from 'path';
 dotenv.config();
 const PORT = process.env.PORT || 8000;
 const app = express();
@@ -10,6 +11,9 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 app.use(express.urlencoded({extended: true}));
+const uploadsPath = path.join(__dirname, '..', 'public');
+console.log('uploadsPath:', uploadsPath);
+app.use('/public', express.static(uploadsPath));
 app.use('/gpt', gptroutes);
 
 app.get('/', (_req: Request, res: Response) => {
