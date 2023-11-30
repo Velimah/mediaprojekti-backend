@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import { MongoError } from "mongodb";
 import bcrypt from "bcrypt";
 import { User } from "../models/user-model";
+import { Website } from "../models/website-model";
 import dotenv from "dotenv";
 import jwt, { Secret } from "jsonwebtoken";
 dotenv.config();
@@ -89,6 +90,36 @@ router.post("/logout", async (_req: Request, res: Response) => {
   try {
     // do something here?
     return res.status(200).json({ message: "Logged out" });
+  } catch (error: unknown) {
+    if (error instanceof MongoError) {
+      return res
+        .status(500)
+        .json({ message: "MongoError: ", error: error.message });
+    } else {
+      return res
+        .status(500)
+        .json({ message: "Logout failed: ", error: String(error) });
+    }
+  }
+});
+
+// save code 
+router.post("/savecode", async (req: Request, res: Response) => {
+
+  // TODO: confirm auth
+
+  try {
+    const { name, html, userId } = req.body;
+
+    const newWebsite = new Website({
+      name,
+      html,
+      user: userId 
+    });
+
+    await newWebsite.save();
+
+    return res.status(200).json({ message: "Code saved" });
   } catch (error: unknown) {
     if (error instanceof MongoError) {
       return res
