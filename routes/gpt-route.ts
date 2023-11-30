@@ -122,7 +122,8 @@ const generateImage = async (prompt: string, size: Size) => {
     console.log("success", data);
     // Return url
     // TODO: return shortened URL
-    return(await downloadImage(data.data[0].url));
+    const imageUrl = await downloadImage(data.data[0].url);
+    return(imageUrl);
   } catch (error) {
     console.error(error);
   }
@@ -131,55 +132,62 @@ const generateImage = async (prompt: string, size: Size) => {
 // Function to download an image from a URL and save it to a local folder
 const downloadImage = async (url: string) => {
   const baseURL = 'http://localhost:8000/';
-  let imageURL = baseURL;
-  // Go up two levels
-  const rootFolder = path.join(__dirname, '..', '..', 'public');
-  const dateFolder = '\\'+getLocalDate(); // todays date, in day.month.year format
-  const folderPath = rootFolder+dateFolder;
-  
-  // Ensure the folder exists, if not, create a new folder
-  if (!fs.existsSync(folderPath)) {
-    fs.mkdirSync(folderPath, { recursive: true });
-  }
 
-  // If filename already exists, add a number to it
-  const fileType = ".png";
-  // TODO: add username to fileName?
-  const fileName = "ai";
-  let counter = 1;
-  while(fs.existsSync(folderPath + '\\' + fileName + '_' + counter + fileType)){counter++;}
+  return new Promise<string>((resolve, reject) => {
+    let imageURL = baseURL;
 
-  const newFileName = fileName + '_' + counter + fileType;
+    // Go up two levels
+    const rootFolder = path.join(__dirname, '..', '..', 'public');
+    const dateFolder = '\\' + getLocalDate(); // todays date, in day.month.year format
+    const folderPath = rootFolder + dateFolder;
 
-  const imagePath = path.join(folderPath, newFileName);
+    // Ensure the folder exists, if not, create a new folder
+    if (!fs.existsSync(folderPath)) {
+      fs.mkdirSync(folderPath, { recursive: true });
+    }
 
-  // Send an HTTP GET request to the URL
-  const request = https.get(url, (response) => {
-    // Create a writable stream to the local file
-    const fileStream = fs.createWriteStream(imagePath);
+    // If filename already exists, add a number to it
+    // TODO: add username to fileName?
+    const fileType = ".png";
+    const fileName = "ai";
+    let counter = 1;
+    while (fs.existsSync(folderPath + '\\' + fileName + '_' + counter + fileType)) {counter++;}
 
-    // Pipe the response stream to the local file
-    response.pipe(fileStream);
+    const newFileName = fileName + '_' + counter + fileType;
+    const imagePath = path.join(folderPath, newFileName);
 
-    // Listen for the 'end' event to know when the download is complete
-    fileStream.on('finish', () => {
-      fileStream.close(() => {
-        console.log(`Image downloaded and saved to: ${imagePath}`);
-        imageURL = imageURL + 'public/'+getLocalDate()+'/'+newFileName;
-        console.log('Image URL: '+imageURL);
+    // Send an HTTP GET request to the URL
+    const request = https.get(url, (response) => {
+      // Create a writable stream to the local file
+      const fileStream = fs.createWriteStream(imagePath);
+
+      // Pipe the response stream to the local file
+      response.pipe(fileStream);
+
+      // Listen for the 'end' event to know when the download is complete
+      fileStream.on('finish', () => {
+        fileStream.close(() => {
+          imageURL = imageURL + 'public/' + getLocalDate() + '/' + newFileName;
+          console.log(`Image downloaded and saved to: ${imagePath}`);
+          console.log('Image URL: ' + imageURL);
+
+          // Resolve with the imageURL after the image is downloaded
+          resolve(imageURL);
+        });
       });
     });
+
+    // Handle errors during the HTTPS request
+    request.on('error', (err) => {
+      console.error('Error downloading the image:', err);
+      
+      // Reject with the error
+      reject(err);
+    });
   });
+};
 
-  // Handle errors during the HTTPS request
-  request.on('error', (err) => {
-    console.error('Error downloading the image:', err);
-  });
-
-  //return url
-  return imageURL;
-}
-
+// Get local date
 const getLocalDate = () => {
   const date = new Date();
 
