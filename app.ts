@@ -12,7 +12,6 @@ app.use(express.json());
 app.use(cors());
 app.use(express.urlencoded({extended: true}));
 const uploadsPath = path.join(__dirname, '..', 'public');
-console.log('uploadsPath:', uploadsPath);
 app.use('/public', express.static(uploadsPath));
 app.use('/gpt', gptroutes);
 
