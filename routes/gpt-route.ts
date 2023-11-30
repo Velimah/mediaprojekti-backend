@@ -151,7 +151,7 @@ const downloadImage = async (url: string) => {
 
     // Go up two levels
     const rootFolder = path.join(__dirname, '..', '..', 'public');
-    const dateFolder = '\\' + getLocalDate(); // todays date, in day.month.year format
+    const dateFolder = '/' + getLocalDate(); // todays date, in day.month.year format
     const folderPath = rootFolder + dateFolder;
 
     // Ensure the folder exists, if not, create a new folder
@@ -164,7 +164,7 @@ const downloadImage = async (url: string) => {
     const fileType = ".png";
     const fileName = "ai";
     let counter = 1;
-    while (fs.existsSync(folderPath + '\\' + fileName + '_' + counter + fileType)) {counter++;}
+    while (fs.existsSync(folderPath + '/' + fileName + '_' + counter + fileType)) {counter++;}
 
     const newFileName = fileName + '_' + counter + fileType;
     const imagePath = path.join(folderPath, newFileName);
