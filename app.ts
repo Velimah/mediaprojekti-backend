@@ -4,6 +4,7 @@ import cors from 'cors';
 import { router as gptroutes } from './routes/gpt-route';
 import { router as userroutes } from './routes/user-routes';
 import dotenv from 'dotenv';
+import path from 'path';
 dotenv.config();
 const PORT = process.env.PORT || 8000;
 const app = express();
@@ -21,6 +22,8 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(express.urlencoded({extended: true}));
+const uploadsPath = path.join(__dirname, '..', 'public');
+app.use('/public', express.static(uploadsPath));
 app.use('/gpt', gptroutes);
 app.use('/user', userroutes);
 
