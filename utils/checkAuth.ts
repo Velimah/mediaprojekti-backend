@@ -8,7 +8,13 @@ export const authenticateToken = async (
   res: Response,
   next: NextFunction
 ) => {
-  const token = req.headers.authorization!.split(" ")[1];
+  const authheader = req.headers.authorization;
+
+  if (!authheader || !authheader.startsWith("Bearer ")) {
+    return res.status(401).json({ message: "Unauthorized: Missing header or invalid format" });
+  }
+
+  const token = authheader!.split(" ")[1];
 
   if (!token) {
     return res.status(401).json({ message: "Unauthorized: Missing token" });
