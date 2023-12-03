@@ -5,6 +5,8 @@ import { User } from "../models/user-model";
 import { Website } from "../models/website-model";
 import dotenv from "dotenv";
 import jwt, { Secret } from "jsonwebtoken";
+import { authenticateToken } from "../utils/checkAuth";
+import { generateImageFromHTML } from "../utils/generateImagesFromHTML";
 dotenv.config();
 const router = express.Router();
 
@@ -44,7 +46,7 @@ router.post("/register", async (req: Request, res: Response) => {
 const jwtsecret: Secret = process.env.JWT_SECRET as string;
 
 const generateToken = (user: { username: string }) => {
-  return jwt.sign({ username: user.username }, jwtsecret, { expiresIn: "24h" });
+  return jwt.sign({ username: user.username }, jwtsecret, { expiresIn: "24hr" });
 };
 
 // Login user
@@ -71,7 +73,12 @@ router.post("/login", async (req: Request, res: Response) => {
     // Set token in auth
     res.setHeader("Authorization", `Bearer ${token}`);
 
-    return res.status(200).json({ message: "Login successful", token });
+    return res.status(200).json({
+      id: user._id,
+      username: user.username,
+      accessToken: token,
+    });
+
   } catch (error: unknown) {
     if (error instanceof MongoError) {
       return res
@@ -104,17 +111,19 @@ router.post("/logout", async (_req: Request, res: Response) => {
 });
 
 // save code 
-router.post("/savecode", async (req: Request, res: Response) => {
+router.post("/savecode", authenticateToken, async (req: Request, res: Response) => {
 
-  // TODO: confirm auth
 
   try {
-    const { name, html, userId } = req.body;
+    const { name, html, user } = req.body;
+
+    const imageBuffer = await generateImageFromHTML(html);
 
     const newWebsite = new Website({
       name,
       html,
-      user: userId 
+      previewimage: imageBuffer.toString('base64'),
+      user: user,
     });
 
     await newWebsite.save();
@@ -124,11 +133,33 @@ router.post("/savecode", async (req: Request, res: Response) => {
     if (error instanceof MongoError) {
       return res
         .status(500)
-        .json({ message: "MongoError: ", error: error.message });
+        .json({ message: "MongoError", error: error.message });
     } else {
       return res
         .status(500)
-        .json({ message: "Logout failed: ", error: String(error) });
+        .json({ message: "Error saving code", error: String(error) });
+    }
+  }
+});
+
+
+// get saved websites
+router.get("/getsaved/:id", authenticateToken, async (req: Request, res: Response) => {
+
+  try {
+    const userId = req.params.id;
+    const savedWebsites = await Website.find({ user: userId });
+   
+    return res.status(200).json(savedWebsites);
+  } catch (error: unknown) {
+    if (error instanceof MongoError) {
+      return res
+        .status(500)
+        .json({ message: "MongoError", error: error.message });
+    } else {
+      return res
+        .status(500)
+        .json({ message: "Error saving code", error: String(error) });
     }
   }
 });

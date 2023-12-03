@@ -18,6 +18,12 @@ const allowlist: string[] = [
 ];
 const corsOptions = {
   origin: allowlist,
+  credentials: true,
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "Access-Control-Allow-Credentials",
+  ],
 };
 
 app.use(cors(corsOptions));
