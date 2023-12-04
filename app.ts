@@ -15,6 +15,7 @@ const allowlist: string[] = [
   'http://localhost:5173',
   'http://localhost:8000',
   'https://medpal-catkos.northeurope.cloudapp.azure.com',
+  'https://velimah.github.io',
 ];
 const corsOptions = {
   origin: allowlist,
