@@ -1,8 +1,6 @@
 export type Role = "html" | "sanitize" | "html_block";
 
-type RoleDescription = string;
-
-export const getRole = (role: Role): RoleDescription => {
+export const getRole = (role: Role) => {
   const roles = {
     html: [
       "Generate HTML code and embed JavaScript without explanations.",
