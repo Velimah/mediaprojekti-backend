@@ -115,11 +115,12 @@ router.post("/savecode", authenticateToken, async (req: Request, res: Response) 
 
 
   try {
-    const { name, html, user } = req.body;
+    const { originalPrompt, name, html, user } = req.body;
 
     const imageBuffer = await generateImageFromHTML(html);
 
     const newWebsite = new Website({
+      originalPrompt,
       name,
       html,
       previewimage: imageBuffer.toString('base64'),

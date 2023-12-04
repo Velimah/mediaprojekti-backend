@@ -1,6 +1,7 @@
 import mongoose, { Document, Schema, Model } from "mongoose";
 
 export interface Website extends Document {
+  originalPrompt: string;
   name: string;
   html: string;
   previewimage?: string;
@@ -9,6 +10,7 @@ export interface Website extends Document {
 
 const websiteSchema = new mongoose.Schema(
   {
+    originalPrompt: { type: String, required: true },
     name: { type: String, required: true },
     html: { type: String, required: true },
     previewimage: { type: String },
