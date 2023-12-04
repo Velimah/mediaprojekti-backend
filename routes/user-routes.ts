@@ -164,4 +164,41 @@ router.get("/getsaved/:id", authenticateToken, async (req: Request, res: Respons
   }
 });
 
+// Update saved website
+router.put("/updatesaved/:id", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const websiteId = req.params.id;
+    const { userId, updatedData } = req.body;
+
+    const website = await Website.findById(websiteId);
+
+    if (!website) {
+      return res.status(404).json({ message: "Website not found" });
+    }
+
+    if (String(website.user) !== userId) {
+      return res.status(403).json({ message: "Unauthorized to update this website" });
+    }
+
+    if (updatedData.html) {
+      const newImageBuffer = await generateImageFromHTML(updatedData.html);
+      updatedData.previewimage = newImageBuffer.toString('base64');
+    }
+
+    const updatedWebsite = await Website.findByIdAndUpdate(
+      websiteId,
+      updatedData,
+      { new: true }
+    );
+
+    return res.status(200).json(updatedWebsite);
+  } catch (error: unknown) {
+    if (error instanceof MongoError) {
+      return res.status(500).json({ message: "MongoError", error: error.message });
+    } else {
+      return res.status(500).json({ message: "Error updating website", error: String(error) });
+    }
+  }
+});
+
 export { router };
