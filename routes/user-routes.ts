@@ -202,4 +202,32 @@ router.put("/updatesaved/:id", authenticateToken, async (req: Request, res: Resp
   }
 });
 
+// Delete saved website
+router.delete("/deletesaved/:id", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const websiteId = req.params.id;
+    const userId = req.body.userId;
+
+    const website = await Website.findById(websiteId);
+
+    if (!website) {
+      return res.status(404).json({ message: "Website not found" });
+    }
+
+    if (String(website.user) !== userId) {
+      return res.status(403).json({ message: "Unauthorized to delete this website" });
+    }
+
+    await Website.findByIdAndDelete(websiteId);
+
+    return res.status(200).json({ message: "Website deleted" });
+  } catch (error: unknown) {
+    if (error instanceof MongoError) {
+      return res.status(500).json({ message: "MongoError", error: error.message });
+    } else {
+      return res.status(500).json({ message: "Error deleting website", error: String(error) });
+    }
+  }
+});
+
 export { router };
