@@ -7,6 +7,7 @@ import dotenv from "dotenv";
 import jwt, { Secret } from "jsonwebtoken";
 import { authenticateToken } from "../utils/checkAuth";
 import { generateImageFromHTML } from "../utils/generateImagesFromHTML";
+import AdvanceWebsiteModel, { HtmlBlock } from "../models/advanced-website-model";
 dotenv.config();
 const router = express.Router();
 
@@ -229,5 +230,94 @@ router.delete("/deletesaved/:id", authenticateToken, async (req: Request, res: R
     }
   }
 });
+
+// get saved advanced websites
+router.get("/getsavedadvanced/:id", async (req: Request, res: Response) => {
+
+  try {
+    const userId = req.params.id;
+    const savedWebsites = await AdvanceWebsiteModel.find({ user: userId });
+   
+    return res.status(200).json(savedWebsites);
+  } catch (error: unknown) {
+    if (error instanceof MongoError) {
+      return res
+        .status(500)
+        .json({ message: "MongoError", error: error.message });
+    } else {
+      return res
+        .status(500)
+        .json({ message: "Error saving code", error: String(error) });
+    }
+  }
+});
+
+// delete website made with advanced editor
+router.delete("/deleteadvancedsaved/:id", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const websiteId = req.params.id;
+    const userId = req.body.userId;
+
+    const website = await AdvanceWebsiteModel.findById(websiteId);
+
+    if (!website) {
+      return res.status(404).json({ message: "Website not found" });
+    }
+
+    if (String(website.user) !== userId) {
+      return res
+        .status(403)
+        .json({ message: "Unauthorized to delete this website" });
+    }
+
+    await AdvanceWebsiteModel.findByIdAndDelete(websiteId);
+
+    return res.status(200).json({ message: "Website deleted" });
+  } catch (error: unknown) {
+    if (error instanceof MongoError) {
+      return res
+        .status(500)
+        .json({ message: "MongoError", error: error.message });
+    } else {
+      return res
+        .status(500)
+        .json({ message: "Error deleting website", error: String(error) });
+    }
+  }
+});
+
+// save website made with advanced editor
+router.post("/advancedsavecode", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const { originalCode, name, cssLibrary, html, user } = req.body;
+
+    const imageBuffer = await generateImageFromHTML(originalCode);
+    const htmlarray = html as HtmlBlock[];
+    
+    const newWebsite = new AdvanceWebsiteModel({
+      originalCode,
+      name,
+      cssLibrary,
+      htmlarray,
+      previewimage: imageBuffer.toString("base64"),
+      user: user,
+    });
+    
+    await newWebsite.save();
+
+    return res.status(200).json({ message: "Code saved" });
+  } catch (error: unknown) {
+    if (error instanceof MongoError) {
+      return res
+        .status(500)
+        .json({ message: "MongoError", error: error.message });
+    } else {
+      return res
+        .status(500)
+        .json({ message: "Error saving code", error: String(error) });
+    }
+  }
+});
+
 
 export { router };
