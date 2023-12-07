@@ -47,7 +47,7 @@ router.post("/register", async (req: Request, res: Response) => {
 const jwtsecret: Secret = process.env.JWT_SECRET as string;
 
 const generateToken = (user: { username: string }) => {
-  return jwt.sign({ username: user.username }, jwtsecret, { expiresIn: "24hr" });
+  return jwt.sign({ username: user.username }, jwtsecret, { expiresIn: "4hr"});
 };
 
 // Login user
@@ -232,7 +232,7 @@ router.delete("/deletesaved/:id", authenticateToken, async (req: Request, res: R
 });
 
 // get saved advanced websites
-router.get("/getsavedadvanced/:id", async (req: Request, res: Response) => {
+router.get("/getsavedadvanced/:id", authenticateToken, async (req: Request, res: Response) => {
 
   try {
     const userId = req.params.id;
@@ -248,6 +248,53 @@ router.get("/getsavedadvanced/:id", async (req: Request, res: Response) => {
       return res
         .status(500)
         .json({ message: "Error saving code", error: String(error) });
+    }
+  }
+});
+
+// Update saved advanced website
+router.put("/updatesavedadvanced/:id", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const websiteId = req.params.id;
+    const { userId, updatedData } = req.body;
+
+    console.log(updatedData);
+
+    const website = await AdvanceWebsiteModel.findById(websiteId);
+
+    if (!website) {
+      return res.status(404).json({ message: "Website not found" });
+    }
+
+    if (String(website.user) !== userId) {
+      return res
+        .status(403)
+        .json({ message: "Unauthorized to update this website" });
+    }
+
+    if (updatedData.originalCode) {
+      const newImageBuffer = await generateImageFromHTML(
+        updatedData.originalCode
+      );
+      updatedData.previewimage = newImageBuffer.toString("base64");
+    }
+
+    const updatedWebsite = await AdvanceWebsiteModel.findByIdAndUpdate(
+      websiteId,
+      updatedData,
+      { new: true }
+    );
+
+    return res.status(200).json(updatedWebsite);
+  } catch (error: unknown) {
+    if (error instanceof MongoError) {
+      return res
+        .status(500)
+        .json({ message: "MongoError", error: error.message });
+    } else {
+      return res
+        .status(500)
+        .json({ message: "Error updating website", error: String(error) });
     }
   }
 });
