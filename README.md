@@ -296,10 +296,10 @@ HTTP/1.1 200 OK
 
 [
   {
-    "_id": user id;
-    "name": username;
-    "html": website html string;
-    "previewimage": image string | null;
+    "_id": "user_id";
+    "name": "username";
+    "html": "website_html_string";
+    "previewimage": "image_string" | null;
   },
   //... more website objects
 ]
@@ -346,10 +346,10 @@ HTTP/1.1 500 Internal Server Error
 HTTP/1.1 200 OK
 
 {
-  "_id": user id;
-  "name": username;
-  "html": website html string;
-  "previewimage": image string | null;
+  "_id": "user_id";
+  "name": "username";
+  "html": "website_html_string";
+  "previewimage": "image_string" | null;
 }
 ```
 
@@ -417,7 +417,7 @@ HTTP/1.1 200 OK
 HTTP/1.1 403 Forbidden
 
 {
-  message: "Unauthorized to delete this website"
+  "message": "Unauthorized to delete this website"
 }
 ```
 
