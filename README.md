@@ -28,15 +28,15 @@ This document provides details about the various endpoints available in the API 
   - [Login](#login)
   - [Logout](#logout)
 - [Websites](#websites)
-  - [Save a website](#save_a_website)
-  - [Get saved websites](#get_saved_websites)
-  - [Update a website](#update_a_website)
-  - [Delete a website](#delete_a_website)
+  - [Save a website](#save-a-website)
+  - [Get saved websites](#get-saved-websites)
+  - [Update a website](#update-a-website)
+  - [Delete a website](#delete-a-website)
 - [Advanced Websites](#websites)
-  - [Save an advanced website](#save_an_advanced_website)
-  - [Get saved advanced websites](#get_saved_advanced_websites)
-  - [Update an advanced website](#update_an_advanced_website)
-  - [Delete an advanced website](#delete_an_advanced_website)
+  - [Save an advanced website](#save-an-advanced-website)
+  - [Get saved advanced websites](#get-saved-advanced-websites)
+  - [Update an advanced website](#update-an-advanced-website)
+  - [Delete an advanced website](#delete-an-advanced-website)
 
 
 ## Authentication
@@ -422,6 +422,14 @@ HTTP/1.1 500 Internal Server Error
 
 **Description:** Get saved advanced websites
 
+```javascript
+interface HtmlBlock {
+  id: number;
+  name: string;
+  content: string;
+}
+```
+
 **Header**
 | Field                     | Type     | Required | Description           |
 |---------------------------|----------|----------|-----------------------|
@@ -441,8 +449,8 @@ HTTP/1.1 200 OK
     "originalCode": "html_string",
     "name": "website_name",
     "htmlArray": [
-      "htmlblock_1",
-      "htmlblock_2",
+      HtmlBlock,
+      HtmlBlock2,
       // ... more HTML blocks
     ],
     "previewImage": "image_string" | null,
@@ -467,4 +475,211 @@ HTTP/1.1 500 Internal Server Error
 {
   "message": "Error saving code", error: String(error)
 }
+```
+### Update an advanced website
+
+**Endpoint:** `PUT /user/updatesavedadvanced/:id`
+
+**Description:** Updates a saved advanced website to database.
+
+```javascript
+interface HtmlBlock {
+  id: number;
+  name: string;
+  content: string;
+}
+```
+
+**Header**
+| Field                     | Type     | Required | Description           |
+|---------------------------|----------|----------|-----------------------|
+| `Authorization: token `   | String   | Yes      | Authentication token  |
+
+**Parameter**
+| Field                | Type     | Required | Description           |
+|----------------------|----------|----------|-----------------------|
+| `id`                 | String   | Yes      | website id            |
+| `userId`             | String   | Yes      | current users id      |
+| `updatedData `       | Array    | Yes      | website html array    |
+
+
+**Success Response:**
+```javascript
+HTTP/1.1 200 OK
+
+{
+    "_id": "user_id",
+    "originalCode": "html_string",
+    "name": "website_name",
+    "htmlArray": [
+      HtmlBlock,
+      HtmlBlock2,
+      // ... more HTML blocks
+    ],
+    "previewImage": "image_string" | null,
+    "cssLibrary": "css_library_name"
+  },
+```
+
+**Error Response:**
+```javascript
+HTTP/1.1 403 Forbidden
+
+{
+  "message": "Unauthorized to update this website"
+}
+```
+
+```javascript
+HTTP/1.1 404 File Not Found
+
+{
+  "message": "Website not found" 
+}
+```
+
+```javascript
+HTTP/1.1 500 Internal Server Error
+
+{
+ "message": "MongoError", error: error.message
+}
+```
+
+```javascript
+HTTP/1.1 500 Internal Server Error
+
+{
+ "message": "Error updating website", error: String(error)
+}
+```
+
+### Delete an advanced website
+
+**Endpoint:** `DELETE /user/deleteadvancedsaved/:id`
+
+**Description:** Deletes a saved advanced website from database.
+
+**Header**
+| Field                     | Type     | Required | Description           |
+|---------------------------|----------|----------|-----------------------|
+| `Authorization: token `   | String   | Yes      | Authentication token  |
+
+**Parameter**
+| Field                | Type     | Required | Description           |
+|----------------------|----------|----------|-----------------------|
+| `id`                 | String   | Yes      | website id            |
+| `userId`             | String   | Yes      | current users id      |
+
+**Success Response:**
+```javascript
+HTTP/1.1 200 OK
+
+{
+ "message": "Website deleted"
+}
+```
+
+**Error Response:**
+```javascript
+HTTP/1.1 403 Forbidden
+
+{
+  message: "Unauthorized to delete this website"
+}
+```
+
+```javascript
+HTTP/1.1 404 File Not Found
+
+{
+  "message": "Website not found"
+}
+```
+
+```javascript
+HTTP/1.1 500 Internal Server Error
+
+{
+ "message": "MongoError", error: error.message
+}
+```
+
+```javascript
+HTTP/1.1 500 Internal Server Error
+
+{
+ "message": "Error deleting website", error: String(error)
+}
+```
+
+## OpenAI
+
+### Prompt ChatGPT
+
+**Endpoint:** `POST /gpt/completions`
+
+**Description:** Make query to openAI ChatGPT
+
+```javascript
+type Role = "html" | "sanitize" | "html_block";
+```
+
+**Parameter**
+| Field                | Type     | Required | Description           |
+|----------------------|----------|----------|-----------------------|
+| `role`               | Role     | Yes      | role for chatgpt      |
+| `prompt`             | String   | Yes      | query prompt          |
+
+**Success Response:**
+```javascript 
+HTTP/1.1 200 OK
+
+{
+  "response string"
+}
+```
+
+**Error Response:**
+```javascript 
+HTTP/1.1 500 Internal Server Error
+
+{
+  "message": "An error occurred: ", error: String(error)
+}
+```
+
+### Prompt DALLE
+
+**Endpoint:** `POST /gpt/generations`
+
+**Description:** Make query to openAI DALLE image generator
+
+```javascript 
+type Size = "256x256" | "512x512" | "1024x1024";
+```
+
+**Parameter**
+| Field                | Type     | Required | Description           |
+|----------------------|----------|----------|-----------------------|
+| `prompt`             | String   | Yes      | query prompt          |
+| `size`               | Size     | Yes      | size for image        |
+
+**Success Response:**
+```javascript 
+HTTP/1.1 200 OK
+
+{
+  "response string"
+}
+```
+
+**Error Response:**
+```javascript 
+HTTP/1.1 500 Internal Server Error
+
+{
+  "message": "An error occurred: ", error: String(error)
+}
+```
 ```
