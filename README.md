@@ -29,9 +29,14 @@ This document provides details about the various endpoints available in the API 
   - [Logout](#logout)
 - [Websites](#websites)
   - [Save a website](#save_a_website)
-  - [Get saved websites](#get_saved_websits)
+  - [Get saved websites](#get_saved_websites)
   - [Update a website](#update_a_website)
   - [Delete a website](#delete_a_website)
+- [Advanced Websites](#websites)
+  - [Save an advanced website](#save_an_advanced_website)
+  - [Get saved advanced websites](#get_saved_advanced_websites)
+  - [Update an advanced website](#update_an_advanced_website)
+  - [Delete an advanced website](#delete_an_advanced_website)
 
 
 ## Authentication
@@ -158,7 +163,7 @@ HTTP/1.1 500 Internal Server Error
 **Header**
 | Field                     | Type     | Required | Description           |
 |---------------------------|----------|----------|-----------------------|
-| `Authorization: token `         | String   | Yes      | Authentication token  |
+| `Authorization: token `   | String   | Yes      | Authentication token  |
 
 **Parameter**
 | Field                | Type     | Required | Description           |
@@ -202,7 +207,7 @@ HTTP/1.1 500 Internal Server Error
 **Header**
 | Field                     | Type     | Required | Description           |
 |---------------------------|----------|----------|-----------------------|
-| `Authorization: token `         | String   | Yes      | Authentication token  |
+| `Authorization: token `   | String   | Yes      | Authentication token  |
 
 **Parameter**
 | Field                | Type     | Required | Description           |
@@ -250,14 +255,14 @@ HTTP/1.1 500 Internal Server Error
 **Header**
 | Field                     | Type     | Required | Description           |
 |---------------------------|----------|----------|-----------------------|
-| `Authorization: token `         | String   | Yes      | Authentication token  |
+| `Authorization: token `   | String   | Yes      | Authentication token  |
 
 **Parameter**
 | Field                | Type     | Required | Description           |
 |----------------------|----------|----------|-----------------------|
 | `id`                 | String   | Yes      | website id            |
-| `user`               | String   | Yes      | user id               |
-| `html`               | String   | Yes      | website html string   |
+| `userId`             | String   | Yes      | current users id      |
+| `updatedData `       | String   | Yes      | website html string   |
 
 
 **Success Response:**
@@ -314,12 +319,13 @@ HTTP/1.1 500 Internal Server Error
 **Header**
 | Field                     | Type     | Required | Description           |
 |---------------------------|----------|----------|-----------------------|
-| `Authorization: token `         | String   | Yes      | Authentication token  |
+| `Authorization: token `   | String   | Yes      | Authentication token  |
 
 **Parameter**
 | Field                | Type     | Required | Description           |
 |----------------------|----------|----------|-----------------------|
-| `id`                 | String   | Yes      | current users id      |
+| `id`                 | String   | Yes      | website id            |
+| `userId`             | String   | Yes      | current users id      |
 
 **Success Response:**
 ```javascript
@@ -360,5 +366,105 @@ HTTP/1.1 500 Internal Server Error
 
 {
  "message": "Error deleting website", error: String(error)
+}
+```
+
+## Advanced Websites
+
+### Save an advanced website
+
+**Endpoint:** `POST /user/advancedsavecode`
+
+**Description:** Saves a built website to the database.
+
+**Header**
+| Field                     | Type     | Required | Description           |
+|---------------------------|----------|----------|-----------------------|
+| `Authorization: token `   | String   | Yes      | Authentication token  |
+
+**Parameter**
+| Field                | Type     | Required | Description           |
+|----------------------|----------|----------|-----------------------|
+| `name`               | String   | Yes      | website name          |
+| `cssLibrary`         | String   | Yes      | used css framework/lib|
+| `user`               | String   | Yes      | user id               |
+| `originalCode`       | String   | Yes      | html string           |
+| `html`               | Array    | Yes      | array of html blocks  |
+
+**Success Response:**
+```javascript
+HTTP/1.1 200 OK
+
+{
+  "message": "Code saved"
+}
+```
+
+**Error Response:**
+```javascript 
+HTTP/1.1 500 Internal Server Error
+
+{
+  "message": "MongoError", error: error.message 
+}
+```
+
+```javascript
+HTTP/1.1 500 Internal Server Error
+
+{
+  "message": "Error saving code", error: String(error)
+}
+```
+### Get saved advanced websites
+
+**Endpoint:** `GET /user/getsavedadvanced/:id`
+
+**Description:** Get saved advanced websites
+
+**Header**
+| Field                     | Type     | Required | Description           |
+|---------------------------|----------|----------|-----------------------|
+| `Authorization: token `   | String   | Yes      | Authentication token  |
+
+**Parameter**
+| Field                | Type     | Required | Description           |
+|----------------------|----------|----------|-----------------------|
+| `id`                 | String   | Yes      | user id               |
+
+**Success Response:**
+```javascript
+HTTP/1.1 200 OK
+[
+  {
+    "_id": "user_id",
+    "originalCode": "html_string",
+    "name": "website_name",
+    "htmlArray": [
+      "htmlblock_1",
+      "htmlblock_2",
+      // ... more HTML blocks
+    ],
+    "previewImage": "image_string" | null,
+    "cssLibrary": "css_library_name"
+  },
+  // ... more website objects
+]
+```
+
+**Error Response:**
+```javascript 
+HTTP/1.1 500 Internal Server Error
+
+{
+ "message": "MongoError", error: error.message
+}
+```
+
+```javascript
+HTTP/1.1 500 Internal Server Error
+
+{
+  "message": "Error saving code", error: String(error)
 }
 ```
