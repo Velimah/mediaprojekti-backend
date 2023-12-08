@@ -20,19 +20,22 @@
 
 This document provides details about the various endpoints available in the API and how to use them.
 
->:warning: API requires access credentials to MongoDB if you want to run it locally.
+>:warning: API requires access credentials to MongoDB and OpenAi if you want to run it locally.
 
 ## Table of Contents
 - [Authentication](#authentication)
   - [Register](#register)
   - [Login](#login)
   - [Logout](#logout)
+- [OpenAi](#websites)
+  - [Prompt ChatGPT](#prompt-chatgpt)
+  - [Prompt DALLE](#prompt-dalle)
 - [Websites](#websites)
   - [Save a website](#save-a-website)
   - [Get saved websites](#get-saved-websites)
   - [Update a website](#update-a-website)
   - [Delete a website](#delete-a-website)
-- [Advanced Websites](#websites)
+- [Advanced Websites](#advanced-websites)
   - [Save an advanced website](#save-an-advanced-website)
   - [Get saved advanced websites](#get-saved-advanced-websites)
   - [Update an advanced website](#update-an-advanced-website)
@@ -50,8 +53,8 @@ This document provides details about the various endpoints available in the API 
 **Parameter**
 | Field                | Type     | Required | Description               |
 |--------------------------|----------|----------|-----------------------|
-| `username`               | String   | Yes      | username              |
-| `password`               | String   | Yes      | userpassword          |
+| `username`               | String   | Yes      | name                  |
+| `password`               | String   | Yes      | user password         |
 
 **Success Response:**
 ```javascript 
@@ -151,6 +154,79 @@ HTTP/1.1 500 Internal Server Error
 }
 ```
 
+## OpenAI
+
+### Prompt ChatGPT
+
+**Endpoint:** `POST /gpt/completions`
+
+**Description:** Make query to openAI ChatGPT
+
+**Parameter**
+| Field                | Type     | Required | Description           |
+|----------------------|----------|----------|-----------------------|
+| `role`               | Role     | Yes      | role for chatgpt      |
+| `prompt`             | String   | Yes      | query prompt          |
+
+```javascript
+type Role = "html" | "sanitize" | "html_block";
+```
+
+**Success Response:**
+```javascript 
+HTTP/1.1 200 OK
+
+{
+  "response string"
+}
+```
+
+**Error Response:**
+```javascript 
+HTTP/1.1 500 Internal Server Error
+
+{
+  "message": "An error occurred: ", error: String(error)
+}
+```
+
+### Prompt DALLE
+
+**Endpoint:** `POST /gpt/generations`
+
+**Description:** Make query to openAI DALLE image generator
+
+**Parameter**
+| Field                | Type     | Required | Description           |
+|----------------------|----------|----------|-----------------------|
+| `prompt`             | String   | Yes      | query prompt          |
+| `size`               | Size     | Yes      | size for image        |
+
+```javascript 
+type Size = "256x256" | "512x512" | "1024x1024";
+```
+
+**Success Response:**
+```javascript 
+HTTP/1.1 200 OK
+
+{
+  "data": [
+    {
+      "url": "image_url"
+    }
+  ]
+}
+```
+
+**Error Response:**
+```javascript 
+HTTP/1.1 500 Internal Server Error
+
+{
+  "message": "An error occurred: ", error: String(error)
+}
+```
 
 ## Websites
 
@@ -168,7 +244,7 @@ HTTP/1.1 500 Internal Server Error
 **Parameter**
 | Field                | Type     | Required | Description           |
 |----------------------|----------|----------|-----------------------|
-| `name`               | String   | Yes      | user name             |
+| `name`               | String   | Yes      | website name          |
 | `html`               | String   | Yes      | website html string   |
 | `user`               | String   | Yes      | user id               |
 
@@ -383,13 +459,21 @@ HTTP/1.1 500 Internal Server Error
 | `Authorization: token `   | String   | Yes      | Authentication token  |
 
 **Parameter**
-| Field                | Type     | Required | Description           |
-|----------------------|----------|----------|-----------------------|
-| `name`               | String   | Yes      | website name          |
-| `cssLibrary`         | String   | Yes      | used css framework/lib|
-| `user`               | String   | Yes      | user id               |
-| `originalCode`       | String   | Yes      | html string           |
-| `html`               | Array    | Yes      | array of html blocks  |
+| Field                | Type             | Required | Description           |
+|----------------------|------------------|----------|-----------------------|
+| `name`               | String           | Yes      | website name          |
+| `cssLibrary`         | String           | Yes      | used css framework/lib|
+| `user`               | String           | Yes      | user id               |
+| `originalCode`       | String           | Yes      | html string           |
+| `html`               | Array[HtmlBlock] | Yes      | array of html blocks  |
+
+```javascript
+interface HtmlBlock {
+  id: number;
+  name: string;
+  content: string;
+}
+```
 
 **Success Response:**
 ```javascript
@@ -422,14 +506,6 @@ HTTP/1.1 500 Internal Server Error
 
 **Description:** Get saved advanced websites
 
-```javascript
-interface HtmlBlock {
-  id: number;
-  name: string;
-  content: string;
-}
-```
-
 **Header**
 | Field                     | Type     | Required | Description           |
 |---------------------------|----------|----------|-----------------------|
@@ -439,6 +515,14 @@ interface HtmlBlock {
 | Field                | Type     | Required | Description           |
 |----------------------|----------|----------|-----------------------|
 | `id`                 | String   | Yes      | user id               |
+
+```javascript
+interface HtmlBlock {
+  id: number;
+  name: string;
+  content: string;
+}
+```
 
 **Success Response:**
 ```javascript
@@ -482,13 +566,6 @@ HTTP/1.1 500 Internal Server Error
 
 **Description:** Updates a saved advanced website to database.
 
-```javascript
-interface HtmlBlock {
-  id: number;
-  name: string;
-  content: string;
-}
-```
 
 **Header**
 | Field                     | Type     | Required | Description           |
@@ -496,12 +573,19 @@ interface HtmlBlock {
 | `Authorization: token `   | String   | Yes      | Authentication token  |
 
 **Parameter**
-| Field                | Type     | Required | Description           |
-|----------------------|----------|----------|-----------------------|
-| `id`                 | String   | Yes      | website id            |
-| `userId`             | String   | Yes      | current users id      |
-| `updatedData `       | Array    | Yes      | website html array    |
+| Field                | Type                | Required | Description           |
+|----------------------|---------------------|----------|-----------------------|
+| `id`                 | String              | Yes      | website id            |
+| `userId`             | String              | Yes      | current users id      |
+| `updatedData`        | Array[HtmlBlock]    | Yes      | website html array    |
 
+```javascript
+interface HtmlBlock {
+  id: number;
+  name: string;
+  content: string;
+}
+```
 
 **Success Response:**
 ```javascript
@@ -611,75 +695,4 @@ HTTP/1.1 500 Internal Server Error
 {
  "message": "Error deleting website", error: String(error)
 }
-```
-
-## OpenAI
-
-### Prompt ChatGPT
-
-**Endpoint:** `POST /gpt/completions`
-
-**Description:** Make query to openAI ChatGPT
-
-```javascript
-type Role = "html" | "sanitize" | "html_block";
-```
-
-**Parameter**
-| Field                | Type     | Required | Description           |
-|----------------------|----------|----------|-----------------------|
-| `role`               | Role     | Yes      | role for chatgpt      |
-| `prompt`             | String   | Yes      | query prompt          |
-
-**Success Response:**
-```javascript 
-HTTP/1.1 200 OK
-
-{
-  "response string"
-}
-```
-
-**Error Response:**
-```javascript 
-HTTP/1.1 500 Internal Server Error
-
-{
-  "message": "An error occurred: ", error: String(error)
-}
-```
-
-### Prompt DALLE
-
-**Endpoint:** `POST /gpt/generations`
-
-**Description:** Make query to openAI DALLE image generator
-
-```javascript 
-type Size = "256x256" | "512x512" | "1024x1024";
-```
-
-**Parameter**
-| Field                | Type     | Required | Description           |
-|----------------------|----------|----------|-----------------------|
-| `prompt`             | String   | Yes      | query prompt          |
-| `size`               | Size     | Yes      | size for image        |
-
-**Success Response:**
-```javascript 
-HTTP/1.1 200 OK
-
-{
-  "response string"
-}
-```
-
-**Error Response:**
-```javascript 
-HTTP/1.1 500 Internal Server Error
-
-{
-  "message": "An error occurred: ", error: String(error)
-}
-```
 ```
