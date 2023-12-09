@@ -39,7 +39,7 @@ router.post("/completions", async (req: { body: { role: Role; prompt: string } }
     res.status(200).json(responseContent);
   } catch (error) {
     console.error(error);
-    res.status(500).send("An error occurred");
+    return res.status(500).json({ message: "An error occurred: ", error: String(error) });
   }
 });
 
@@ -105,10 +105,11 @@ type Size = "256x256" | "512x512" | "1024x1024";
 router.post("/generations", async (req: { body: { prompt: string; size: Size } }, res: Response) => {
   try {
     const responseContent = await generateImage(req.body.prompt, req.body.size);
+    console.log("responseContent", responseContent);
     res.send(responseContent);
   } catch (error) {
     console.error(error);
-    res.status(500).send("An error occurred");
+    return res.status(500).json({ message: "An error occurred: ", error: String(error) });
   }
 });
 
