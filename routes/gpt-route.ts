@@ -3,9 +3,9 @@ import express, { Response } from "express";
 import dotenv from "dotenv";
 import { getRole, Role } from "../roles";
 import { gptResult } from "../models/gpt-model";
-import * as https from 'https';
-import * as fs from 'fs';
-import * as path from 'path';
+import * as https from "https";
+import * as fs from "fs";
+import * as path from "path";
 dotenv.config();
 const router = express.Router();
 
@@ -39,7 +39,7 @@ router.post("/completions", async (req: { body: { role: Role; prompt: string } }
     res.status(200).json(responseContent);
   } catch (error) {
     console.error(error);
-    res.status(500).send("An error occurred");
+    return res.status(500).json({ message: "An error occurred: ", error: String(error) });
   }
 });
 
@@ -63,6 +63,7 @@ const promptGPT = async (role: Role, prompt: string) => {
           content: prompt,
         },
       ],
+      temperature: 0.5,
     }),
   };
 
@@ -104,10 +105,11 @@ type Size = "256x256" | "512x512" | "1024x1024";
 router.post("/generations", async (req: { body: { prompt: string; size: Size } }, res: Response) => {
   try {
     const responseContent = await generateImage(req.body.prompt, req.body.size);
+    console.log("responseContent", responseContent);
     res.send(responseContent);
   } catch (error) {
     console.error(error);
-    res.status(500).send("An error occurred");
+    return res.status(500).json({ message: "An error occurred: ", error: String(error) });
   }
 });
 
@@ -128,30 +130,30 @@ const generateImage = async (prompt: string, size: Size) => {
 
   // fetch image from OpenAI DALLE image API
   try {
-    console.log("fetching image for '"+prompt+"'");
+    console.log("fetching image for '" + prompt + "'");
     const response = await fetch("https://api.openai.com/v1/images/generations", options);
     const data: DalleResponse = (await response.json()) as DalleResponse;
     console.log("success", data);
     // Return url
     // TODO: return shortened URL
     const imageUrl = await downloadImage(data.data[0].url);
-    return(imageUrl);
+    return imageUrl;
   } catch (error) {
     console.error(error);
   }
-}
+};
 
 // Function to download an image from a URL and save it to a local folder
 const downloadImage = async (url: string) => {
   // http://localhost:8000/ || https://medpal-catkos.northeurope.cloudapp.azure.com/
-  const baseURL = 'https://medpal-catkos.northeurope.cloudapp.azure.com/';
+  const baseURL = "https://medpal-catkos.northeurope.cloudapp.azure.com/";
 
   return new Promise<string>((resolve, reject) => {
     let imageURL = baseURL;
 
     // Go up two levels
-    const rootFolder = path.join(__dirname, '..', '..', 'public');
-    const dateFolder = '/' + getLocalDate(); // todays date, in day.month.year format
+    const rootFolder = path.join(__dirname, "..", "..", "public");
+    const dateFolder = "/" + getLocalDate(); // todays date, in day.month.year format
     const folderPath = rootFolder + dateFolder;
 
     // Ensure the folder exists, if not, create a new folder
@@ -164,9 +166,11 @@ const downloadImage = async (url: string) => {
     const fileType = ".png";
     const fileName = "ai";
     let counter = 1;
-    while (fs.existsSync(folderPath + '/' + fileName + '_' + counter + fileType)) {counter++;}
+    while (fs.existsSync(folderPath + "/" + fileName + "_" + counter + fileType)) {
+      counter++;
+    }
 
-    const newFileName = fileName + '_' + counter + fileType;
+    const newFileName = fileName + "_" + counter + fileType;
     const imagePath = path.join(folderPath, newFileName);
 
     // Send an HTTP GET request to the URL
@@ -178,11 +182,11 @@ const downloadImage = async (url: string) => {
       response.pipe(fileStream);
 
       // Listen for the 'end' event to know when the download is complete
-      fileStream.on('finish', () => {
+      fileStream.on("finish", () => {
         fileStream.close(() => {
-          imageURL = imageURL + 'public/' + getLocalDate() + '/' + newFileName;
+          imageURL = imageURL + "public/" + getLocalDate() + "/" + newFileName;
           console.log(`Image downloaded and saved to: ${imagePath}`);
-          console.log('Image URL: ' + imageURL);
+          console.log("Image URL: " + imageURL);
 
           // Resolve with the imageURL after the image is downloaded
           resolve(imageURL);
@@ -191,9 +195,9 @@ const downloadImage = async (url: string) => {
     });
 
     // Handle errors during the HTTPS request
-    request.on('error', (err) => {
-      console.error('Error downloading the image:', err);
-      
+    request.on("error", (err) => {
+      console.error("Error downloading the image:", err);
+
       // Reject with the error
       reject(err);
     });
@@ -204,18 +208,16 @@ const downloadImage = async (url: string) => {
 const getLocalDate = () => {
   const date = new Date();
 
-  const options: Intl.DateTimeFormatOptions ={
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
+  const options: Intl.DateTimeFormatOptions = {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
   };
 
-  const formattedDate = date.toLocaleDateString('fi-FI', options)
-    .replace(/\./g, '_'); // Replace dots with underscores
+  const formattedDate = date.toLocaleDateString("fi-FI", options).replace(/\./g, "_"); // Replace dots with underscores
 
   console.log(formattedDate);
   return formattedDate;
-}
-
+};
 
 export { router };
