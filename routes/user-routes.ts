@@ -33,13 +33,9 @@ router.post("/register", async (req: Request, res: Response) => {
     return res.status(201).json({ message: "User registered successfully" });
   } catch (error: unknown) {
     if (error instanceof MongoError) {
-      return res
-        .status(500)
-        .json({ message: "MongoError: ", error: error.message });
+      return res.status(500).json({ message: "MongoError: ", error: error.message });
     } else {
-      return res
-        .status(500)
-        .json({ message: "Register error: ", error: String(error) });
+      return res.status(500).json({ message: "Register error: ", error: String(error) });
     }
   }
 });
@@ -47,7 +43,7 @@ router.post("/register", async (req: Request, res: Response) => {
 const jwtsecret: Secret = process.env.JWT_SECRET as string;
 
 const generateToken = (user: { username: string }) => {
-  return jwt.sign({ username: user.username }, jwtsecret, { expiresIn: "4hr"});
+  return jwt.sign({ username: user.username }, jwtsecret, { expiresIn: "4hr" });
 };
 
 // Login user
@@ -79,16 +75,11 @@ router.post("/login", async (req: Request, res: Response) => {
       username: user.username,
       accessToken: token,
     });
-
   } catch (error: unknown) {
     if (error instanceof MongoError) {
-      return res
-        .status(500)
-        .json({ message: "MongoError: ", error: error.message });
+      return res.status(500).json({ message: "MongoError: ", error: error.message });
     } else {
-      return res
-        .status(500)
-        .json({ message: "Login failed", error: String(error) });
+      return res.status(500).json({ message: "Login failed", error: String(error) });
     }
   }
 });
@@ -100,21 +91,15 @@ router.post("/logout", async (_req: Request, res: Response) => {
     return res.status(200).json({ message: "Logged out" });
   } catch (error: unknown) {
     if (error instanceof MongoError) {
-      return res
-        .status(500)
-        .json({ message: "MongoError: ", error: error.message });
+      return res.status(500).json({ message: "MongoError: ", error: error.message });
     } else {
-      return res
-        .status(500)
-        .json({ message: "Logout failed: ", error: String(error) });
+      return res.status(500).json({ message: "Logout failed: ", error: String(error) });
     }
   }
 });
 
-// save code 
+// save code
 router.post("/savecode", authenticateToken, async (req: Request, res: Response) => {
-
-
   try {
     const { originalPrompt, name, html, user } = req.body;
 
@@ -124,7 +109,7 @@ router.post("/savecode", authenticateToken, async (req: Request, res: Response) 
       originalPrompt,
       name,
       html,
-      previewimage: imageBuffer.toString('base64'),
+      previewimage: imageBuffer.toString("base64"),
       user: user,
     });
 
@@ -133,35 +118,25 @@ router.post("/savecode", authenticateToken, async (req: Request, res: Response) 
     return res.status(200).json({ message: "Code saved", _id: newWebsite._id });
   } catch (error: unknown) {
     if (error instanceof MongoError) {
-      return res
-        .status(500)
-        .json({ message: "MongoError", error: error.message });
+      return res.status(500).json({ message: "MongoError", error: error.message });
     } else {
-      return res
-        .status(500)
-        .json({ message: "Error saving code", error: String(error) });
+      return res.status(500).json({ message: "Error saving code", error: String(error) });
     }
   }
 });
 
-
 // get saved websites
 router.get("/getsaved/:id", authenticateToken, async (req: Request, res: Response) => {
-
   try {
     const userId = req.params.id;
     const savedWebsites = await Website.find({ user: userId });
-   
+
     return res.status(200).json(savedWebsites);
   } catch (error: unknown) {
     if (error instanceof MongoError) {
-      return res
-        .status(500)
-        .json({ message: "MongoError", error: error.message });
+      return res.status(500).json({ message: "MongoError", error: error.message });
     } else {
-      return res
-        .status(500)
-        .json({ message: "Error saving code", error: String(error) });
+      return res.status(500).json({ message: "Error saving code", error: String(error) });
     }
   }
 });
@@ -184,14 +159,10 @@ router.put("/updatesaved/:id", authenticateToken, async (req: Request, res: Resp
 
     if (updatedData.html) {
       const newImageBuffer = await generateImageFromHTML(updatedData.html);
-      updatedData.previewimage = newImageBuffer.toString('base64');
+      updatedData.previewimage = newImageBuffer.toString("base64");
     }
 
-    const updatedWebsite = await Website.findByIdAndUpdate(
-      websiteId,
-      updatedData,
-      { new: true }
-    );
+    const updatedWebsite = await Website.findByIdAndUpdate(websiteId, updatedData, { new: true });
 
     return res.status(200).json(updatedWebsite);
   } catch (error: unknown) {
@@ -206,6 +177,7 @@ router.put("/updatesaved/:id", authenticateToken, async (req: Request, res: Resp
 // Delete saved website
 router.delete("/deletesaved/:id", authenticateToken, async (req: Request, res: Response) => {
   try {
+    console.log("body", req.body);
     const websiteId = req.params.id;
     const userId = req.body.userId;
 
@@ -233,21 +205,16 @@ router.delete("/deletesaved/:id", authenticateToken, async (req: Request, res: R
 
 // get saved advanced websites
 router.get("/getsavedadvanced/:id", authenticateToken, async (req: Request, res: Response) => {
-
   try {
     const userId = req.params.id;
     const savedWebsites = await AdvanceWebsiteModel.find({ user: userId });
-   
+
     return res.status(200).json(savedWebsites);
   } catch (error: unknown) {
     if (error instanceof MongoError) {
-      return res
-        .status(500)
-        .json({ message: "MongoError", error: error.message });
+      return res.status(500).json({ message: "MongoError", error: error.message });
     } else {
-      return res
-        .status(500)
-        .json({ message: "Error saving code", error: String(error) });
+      return res.status(500).json({ message: "Error saving code", error: String(error) });
     }
   }
 });
@@ -267,34 +234,22 @@ router.put("/updatesavedadvanced/:id", authenticateToken, async (req: Request, r
     }
 
     if (String(website.user) !== userId) {
-      return res
-        .status(403)
-        .json({ message: "Unauthorized to update this website" });
+      return res.status(403).json({ message: "Unauthorized to update this website" });
     }
 
     if (updatedData.originalCode) {
-      const newImageBuffer = await generateImageFromHTML(
-        updatedData.originalCode
-      );
+      const newImageBuffer = await generateImageFromHTML(updatedData.originalCode);
       updatedData.previewimage = newImageBuffer.toString("base64");
     }
 
-    const updatedWebsite = await AdvanceWebsiteModel.findByIdAndUpdate(
-      websiteId,
-      updatedData,
-      { new: true }
-    );
+    const updatedWebsite = await AdvanceWebsiteModel.findByIdAndUpdate(websiteId, updatedData, { new: true });
 
     return res.status(200).json(updatedWebsite);
   } catch (error: unknown) {
     if (error instanceof MongoError) {
-      return res
-        .status(500)
-        .json({ message: "MongoError", error: error.message });
+      return res.status(500).json({ message: "MongoError", error: error.message });
     } else {
-      return res
-        .status(500)
-        .json({ message: "Error updating website", error: String(error) });
+      return res.status(500).json({ message: "Error updating website", error: String(error) });
     }
   }
 });
@@ -312,9 +267,7 @@ router.delete("/deleteadvancedsaved/:id", authenticateToken, async (req: Request
     }
 
     if (String(website.user) !== userId) {
-      return res
-        .status(403)
-        .json({ message: "Unauthorized to delete this website" });
+      return res.status(403).json({ message: "Unauthorized to delete this website" });
     }
 
     await AdvanceWebsiteModel.findByIdAndDelete(websiteId);
@@ -322,13 +275,9 @@ router.delete("/deleteadvancedsaved/:id", authenticateToken, async (req: Request
     return res.status(200).json({ message: "Website deleted" });
   } catch (error: unknown) {
     if (error instanceof MongoError) {
-      return res
-        .status(500)
-        .json({ message: "MongoError", error: error.message });
+      return res.status(500).json({ message: "MongoError", error: error.message });
     } else {
-      return res
-        .status(500)
-        .json({ message: "Error deleting website", error: String(error) });
+      return res.status(500).json({ message: "Error deleting website", error: String(error) });
     }
   }
 });
@@ -340,7 +289,7 @@ router.post("/advancedsavecode", authenticateToken, async (req: Request, res: Re
 
     const imageBuffer = await generateImageFromHTML(originalCode);
     const htmlarray = html as HtmlBlock[];
-    
+
     const newWebsite = new AdvanceWebsiteModel({
       originalCode,
       name,
@@ -349,22 +298,17 @@ router.post("/advancedsavecode", authenticateToken, async (req: Request, res: Re
       previewimage: imageBuffer.toString("base64"),
       user: user,
     });
-    
+
     await newWebsite.save();
 
     return res.status(200).json({ message: "Code saved", _id: newWebsite._id });
   } catch (error: unknown) {
     if (error instanceof MongoError) {
-      return res
-        .status(500)
-        .json({ message: "MongoError", error: error.message });
+      return res.status(500).json({ message: "MongoError", error: error.message });
     } else {
-      return res
-        .status(500)
-        .json({ message: "Error saving code", error: String(error) });
+      return res.status(500).json({ message: "Error saving code", error: String(error) });
     }
   }
 });
-
 
 export { router };
