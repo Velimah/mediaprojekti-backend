@@ -130,7 +130,7 @@ router.post("/savecode", authenticateToken, async (req: Request, res: Response) 
 
     await newWebsite.save();
 
-    return res.status(200).json({ message: "Code saved" });
+    return res.status(200).json({ message: "Code saved", _id: newWebsite._id });
   } catch (error: unknown) {
     if (error instanceof MongoError) {
       return res
@@ -352,7 +352,7 @@ router.post("/advancedsavecode", authenticateToken, async (req: Request, res: Re
     
     await newWebsite.save();
 
-    return res.status(200).json({ message: "Code saved" });
+    return res.status(200).json({ message: "Code saved", _id: newWebsite._id });
   } catch (error: unknown) {
     if (error instanceof MongoError) {
       return res
