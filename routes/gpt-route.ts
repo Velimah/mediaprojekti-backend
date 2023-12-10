@@ -3,9 +3,7 @@ import express, { Response } from "express";
 import dotenv from "dotenv";
 import { getRole, Role } from "../roles";
 import { gptResult } from "../models/gpt-model";
-import * as https from "https";
-import * as fs from "fs";
-import * as path from "path";
+import { downloadImage } from "../utils/downloadImage";
 dotenv.config();
 const router = express.Router();
 
@@ -39,7 +37,7 @@ router.post("/completions", async (req: { body: { role: Role; prompt: string } }
     res.status(200).json(responseContent);
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "An error occurred: ", error: String(error) });
+    res.status(500).send("An error occurred");
   }
 });
 
@@ -63,7 +61,6 @@ const promptGPT = async (role: Role, prompt: string) => {
           content: prompt,
         },
       ],
-      temperature: 0.5,
     }),
   };
 
@@ -102,19 +99,18 @@ const saveToDatabase = async (data: GptResponse) => {
 
 // route for sending queries to OpenAI DALLE image API
 type Size = "256x256" | "512x512" | "1024x1024";
-router.post("/generations", async (req: { body: { prompt: string; size: Size } }, res: Response) => {
+router.post("/generations", async (req: { body: { prompt: string; size: Size, username: string } }, res: Response) => {
   try {
-    const responseContent = await generateImage(req.body.prompt, req.body.size);
-    console.log("responseContent", responseContent);
+    const responseContent = await generateImage(req.body.prompt, req.body.size, req.body.username);
     res.send(responseContent);
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "An error occurred: ", error: String(error) });
+    res.status(500).send("An error occurred");
   }
 });
 
 // function for fetching response from OpenAI DALLE image API
-const generateImage = async (prompt: string, size: Size) => {
+const generateImage = async (prompt: string, size: Size, username: string) => {
   const options = {
     method: "POST",
     headers: {
@@ -130,94 +126,17 @@ const generateImage = async (prompt: string, size: Size) => {
 
   // fetch image from OpenAI DALLE image API
   try {
-    console.log("fetching image for '" + prompt + "'");
+    console.log("fetching image for '"+prompt+"'");
     const response = await fetch("https://api.openai.com/v1/images/generations", options);
     const data: DalleResponse = (await response.json()) as DalleResponse;
     console.log("success", data);
+    // Download generated img to server, return url for image
+    const imageUrl = await downloadImage(data.data[0].url, username);
     // Return url
-    // TODO: return shortened URL
-    const imageUrl = await downloadImage(data.data[0].url);
-    return imageUrl;
+    return(imageUrl);
   } catch (error) {
     console.error(error);
   }
-};
-
-// Function to download an image from a URL and save it to a local folder
-const downloadImage = async (url: string) => {
-  // http://localhost:8000/ || https://medpal-catkos.northeurope.cloudapp.azure.com/
-  const baseURL = "https://medpal-catkos.northeurope.cloudapp.azure.com/";
-
-  return new Promise<string>((resolve, reject) => {
-    let imageURL = baseURL;
-
-    // Go up two levels
-    const rootFolder = path.join(__dirname, "..", "..", "public");
-    const dateFolder = "/" + getLocalDate(); // todays date, in day.month.year format
-    const folderPath = rootFolder + dateFolder;
-
-    // Ensure the folder exists, if not, create a new folder
-    if (!fs.existsSync(folderPath)) {
-      fs.mkdirSync(folderPath, { recursive: true });
-    }
-
-    // If filename already exists, add a number to it
-    // TODO: add username to fileName?
-    const fileType = ".png";
-    const fileName = "ai";
-    let counter = 1;
-    while (fs.existsSync(folderPath + "/" + fileName + "_" + counter + fileType)) {
-      counter++;
-    }
-
-    const newFileName = fileName + "_" + counter + fileType;
-    const imagePath = path.join(folderPath, newFileName);
-
-    // Send an HTTP GET request to the URL
-    const request = https.get(url, (response) => {
-      // Create a writable stream to the local file
-      const fileStream = fs.createWriteStream(imagePath);
-
-      // Pipe the response stream to the local file
-      response.pipe(fileStream);
-
-      // Listen for the 'end' event to know when the download is complete
-      fileStream.on("finish", () => {
-        fileStream.close(() => {
-          imageURL = imageURL + "public/" + getLocalDate() + "/" + newFileName;
-          console.log(`Image downloaded and saved to: ${imagePath}`);
-          console.log("Image URL: " + imageURL);
-
-          // Resolve with the imageURL after the image is downloaded
-          resolve(imageURL);
-        });
-      });
-    });
-
-    // Handle errors during the HTTPS request
-    request.on("error", (err) => {
-      console.error("Error downloading the image:", err);
-
-      // Reject with the error
-      reject(err);
-    });
-  });
-};
-
-// Get local date
-const getLocalDate = () => {
-  const date = new Date();
-
-  const options: Intl.DateTimeFormatOptions = {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  };
-
-  const formattedDate = date.toLocaleDateString("fi-FI", options).replace(/\./g, "_"); // Replace dots with underscores
-
-  console.log(formattedDate);
-  return formattedDate;
-};
+}
 
 export { router };

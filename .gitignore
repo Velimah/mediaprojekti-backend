@@ -192,3 +192,6 @@ $RECYCLE.BIN/
 image.webp
 experimental.ts
 prompts.ts
+
+# Ignore folder
+public/
