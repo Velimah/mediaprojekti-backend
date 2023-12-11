@@ -310,7 +310,7 @@ HTTP/1.1 200 OK
 HTTP/1.1 500 Internal Server Error
 
 {
- "message": "MongoError", error: error.message
+  "message": "MongoError", error: error.message
 }
 ```
 
@@ -374,7 +374,7 @@ HTTP/1.1 404 File Not Found
 HTTP/1.1 500 Internal Server Error
 
 {
- "message": "MongoError", error: error.message
+  "message": "MongoError", error: error.message
 }
 ```
 
@@ -382,7 +382,7 @@ HTTP/1.1 500 Internal Server Error
 HTTP/1.1 500 Internal Server Error
 
 {
- "message": "Error updating website", error: String(error)
+  "message": "Error updating website", error: String(error)
 }
 ```
 
@@ -408,7 +408,7 @@ HTTP/1.1 500 Internal Server Error
 HTTP/1.1 200 OK
 
 {
- "message": "Website deleted"
+  "message": "Website deleted"
 }
 ```
 
@@ -433,7 +433,7 @@ HTTP/1.1 404 File Not Found
 HTTP/1.1 500 Internal Server Error
 
 {
- "message": "MongoError", error: error.message
+  "message": "MongoError", error: error.message
 }
 ```
 
@@ -441,7 +441,7 @@ HTTP/1.1 500 Internal Server Error
 HTTP/1.1 500 Internal Server Error
 
 {
- "message": "Error deleting website", error: String(error)
+  "message": "Error deleting website", error: String(error)
 }
 ```
 
@@ -549,7 +549,7 @@ HTTP/1.1 200 OK
 HTTP/1.1 500 Internal Server Error
 
 {
- "message": "MongoError", error: error.message
+  "message": "MongoError", error: error.message
 }
 ```
 
@@ -626,7 +626,7 @@ HTTP/1.1 404 File Not Found
 HTTP/1.1 500 Internal Server Error
 
 {
- "message": "MongoError", error: error.message
+  "message": "MongoError", error: error.message
 }
 ```
 
@@ -634,7 +634,7 @@ HTTP/1.1 500 Internal Server Error
 HTTP/1.1 500 Internal Server Error
 
 {
- "message": "Error updating website", error: String(error)
+  "message": "Error updating website", error: String(error)
 }
 ```
 
@@ -660,7 +660,7 @@ HTTP/1.1 500 Internal Server Error
 HTTP/1.1 200 OK
 
 {
- "message": "Website deleted"
+  "message": "Website deleted"
 }
 ```
 
@@ -669,7 +669,7 @@ HTTP/1.1 200 OK
 HTTP/1.1 403 Forbidden
 
 {
-  message: "Unauthorized to delete this website"
+  "message": "Unauthorized to delete this website"
 }
 ```
 
@@ -685,7 +685,7 @@ HTTP/1.1 404 File Not Found
 HTTP/1.1 500 Internal Server Error
 
 {
- "message": "MongoError", error: error.message
+  "message": "MongoError", error: error.message
 }
 ```
 
@@ -693,6 +693,6 @@ HTTP/1.1 500 Internal Server Error
 HTTP/1.1 500 Internal Server Error
 
 {
- "message": "Error deleting website", error: String(error)
+  "message": "Error deleting website", error: String(error)
 }
 ```
