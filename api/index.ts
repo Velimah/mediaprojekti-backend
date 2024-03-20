@@ -10,14 +10,7 @@ const PORT = process.env.PORT || 8000;
 const app = express();
 
 app.use(express.json());
-
-const corsOptions = {
-  origin: "*",
-  credentials: true,
-  allowedHeaders: ["Content-Type", "Authorization", "Access-Control-Allow-Credentials"],
-};
-
-app.use(cors(corsOptions));
+app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 const uploadsPath = path.join(__dirname, "..", "public");
 app.use("/public", express.static(uploadsPath));
