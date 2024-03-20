@@ -26,6 +26,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^7.6.5",
     "openai": "^4.14.2",
+    "pre-commit": "^1.2.2",
     "puppeteer": "^21.5.2",
     "rimraf": "^5.0.5",
     "ts-node": "^10.9.1"

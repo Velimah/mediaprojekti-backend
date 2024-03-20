@@ -1,8 +1,8 @@
 import express, { Request, Response } from "express";
 import mongoose from "mongoose";
 import cors from "cors";
-import { router as gptroutes } from "../routes/gpt-route";
-import { router as userroutes } from "../routes/user-routes";
+import { router as gptroutes } from "./routes/gpt-route";
+import { router as userroutes } from "./routes/user-routes";
 import dotenv from "dotenv";
 import path from "path";
 dotenv.config();
