@@ -7,7 +7,8 @@
     "start": "node app.ts",
     "server": "ts-node ./app.ts",
     "client": "cd ./ && npm start --prefix client",
-    "dev": "concurrently \"npm run server\" \"npm run client\""
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "vercel-build": "echo hello"
   },
   "dependencies": {
     "@types/cors": "^2.8.16",
