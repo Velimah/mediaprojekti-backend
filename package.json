@@ -2,11 +2,12 @@
   "name": "node_project",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/app.js",
+  "main": "app.ts",
   "scripts": {
-    "start": "tsc && node dist/app.js",
-    "lint": "eslint . --ext .ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app.ts",
+    "server": "ts-node ./app.ts",
+    "client": "cd ./ && npm start --prefix client",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
   },
   "dependencies": {
     "@types/cors": "^2.8.16",
