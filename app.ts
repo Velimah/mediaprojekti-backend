@@ -16,6 +16,7 @@ const allowlist: string[] = [
   'http://localhost:8000',
   'https://medpal-catkos.northeurope.cloudapp.azure.com',
   'https://velimah.github.io',
+  'https://ai-pagebuilder.vercel.app',
 ];
 const corsOptions = {
   origin: allowlist,
