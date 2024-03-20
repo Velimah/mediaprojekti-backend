@@ -11,15 +11,8 @@ const app = express();
 
 app.use(express.json());
 
-const allowlist: string[] = [
-  "http://localhost:5173",
-  "http://localhost:8000",
-  "https://medpal-catkos.northeurope.cloudapp.azure.com",
-  "https://velimah.github.io",
-  "https://ai-pagebuilder.vercel.app",
-];
 const corsOptions = {
-  origin: allowlist,
+  origin: "*",
   credentials: true,
   allowedHeaders: ["Content-Type", "Authorization", "Access-Control-Allow-Credentials"],
 };
