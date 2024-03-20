@@ -39,4 +39,5 @@ if (mongoString) {
 app.listen(process.env.PORT || PORT, () => {
   console.log(`Listening on port ${PORT}`);
 });
+
 export default app;
